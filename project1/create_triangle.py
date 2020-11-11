@@ -4,6 +4,9 @@ import numpy as np
 from math import sin, cos
 
 
+
+
+
 # initializing glfw library
 if not glfw.init():
     raise Exception("glfw can not be initialized!")
