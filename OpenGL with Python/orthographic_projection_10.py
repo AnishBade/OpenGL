@@ -16,7 +16,7 @@ out vec3 v_color;
 out vec2 v_texture;
 void main()
 {
-    gl_Position = projection * model * vec4(a_position, 2.0);
+    gl_Position = projection * model * vec4(a_position, 1.0);
     v_texture = a_texture;
 }
 """
@@ -36,7 +36,7 @@ void main()
 # glfw callback functions
 def window_resize(window, width, height):
     glViewport(0, 0, width, height)
-    projection = pyrr.matrix44.create_perspective_projection_matrix(45, width / height, 0.1, 100)
+    projection = pyrr.matrix44.create_orthogonal_projection_matrix(0, width, 0, height, -1000, 1000)
     glUniformMatrix4fv(proj_loc, 1, GL_FALSE, projection)
 
 # initializing glfw library
@@ -60,35 +60,35 @@ glfw.set_window_size_callback(window, window_resize)
 # make the context current
 glfw.make_context_current(window)
 
-vertices = [-1, -1,  1, 0.0, 0.0,
-             1, -1,  1, 1.0, 0.0,
-             1,  1,  1, 1.0, 1.0,
-            -1,  1,  1, 0.0, 1.0,
+vertices = [-0.5, -0.5,  0.5, 0.0, 0.0,
+             0.5, -0.5,  0.5, 1.0, 0.0,
+             0.5,  0.5,  0.5, 1.0, 1.0,
+            -0.5,  0.5,  0.5, 0.0, 1.0,
 
-            -1, -1, -1, 0.0, 0.0,
-             1, -1, -1, 1.0, 0.0,
-             1,  1, -1, 1.0, 1.0,
-            -1,  1, -1, 0.0, 1.0,
+            -0.5, -0.5, -0.5, 0.0, 0.0,
+             0.5, -0.5, -0.5, 1.0, 0.0,
+             0.5,  0.5, -0.5, 1.0, 1.0,
+            -0.5,  0.5, -0.5, 0.0, 1.0,
 
-             1, -1, -1, 0.0, 0.0,
-             1,  1, -1, 1.0, 0.0,
-             1,  1,  1, 1.0, 1.0,
-             1, -1,  1, 0.0, 1.0,
+             0.5, -0.5, -0.5, 0.0, 0.0,
+             0.5,  0.5, -0.5, 1.0, 0.0,
+             0.5,  0.5,  0.5, 1.0, 1.0,
+             0.5, -0.5,  0.5, 0.0, 1.0,
 
-            -1,  1, -1, 0.0, 0.0,
-            -1, -1, -1, 1.0, 0.0,
-            -1, -1,  1, 1.0, 1.0,
-            -1,  1,  1, 0.0, 1.0,
+            -0.5,  0.5, -0.5, 0.0, 0.0,
+            -0.5, -0.5, -0.5, 1.0, 0.0,
+            -0.5, -0.5,  0.5, 1.0, 1.0,
+            -0.5,  0.5,  0.5, 0.0, 1.0,
 
-            -1, -1, -1, 0.0, 0.0,
-             1, -1, -1, 1.0, 0.0,
-             1, -1,  1, 1.0, 1.0,
-            -1, -1,  1, 0.0, 1.0,
+            -0.5, -0.5, -0.5, 0.0, 0.0,
+             0.5, -0.5, -0.5, 1.0, 0.0,
+             0.5, -0.5,  0.5, 1.0, 1.0,
+            -0.5, -0.5,  0.5, 0.0, 1.0,
 
-             1, 1, -1, 0.0, 0.0,
-            -1, 1, -1, 1.0, 0.0,
-            -1, 1,  1, 1.0, 1.0,
-             1, 1,  1, 0.0, 1.0]
+             0.5, 0.5, -0.5, 0.0, 0.0,
+            -0.5, 0.5, -0.5, 1.0, 0.0,
+            -0.5, 0.5,  0.5, 1.0, 1.0,
+             0.5, 0.5,  0.5, 0.0, 1.0]
 
 indices = [ 0,  1,  2,  2,  3,  0,
             4,  5,  6,  6,  7,  4,
@@ -141,8 +141,10 @@ glEnable(GL_DEPTH_TEST)
 glEnable(GL_BLEND)
 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
-projection = pyrr.matrix44.create_perspective_projection_matrix(45, 1280/720,0.1, 100)
-translation = pyrr.matrix44.create_from_translation(pyrr.Vector3([5, 0, -10]))
+# projection = pyrr.matrix44.create_perspective_projection_matrix(45, 1280/720, 0.1, 100)
+projection = pyrr.matrix44.create_orthogonal_projection_matrix(0, 1280, 0, 720, -1000, 1000)
+translation = pyrr.matrix44.create_from_translation(pyrr.Vector3([400, 200, -3]))
+scale = pyrr.matrix44.create_from_scale(pyrr.Vector3([200, 200, 200]))
 
 model_loc = glGetUniformLocation(shader, "model")
 proj_loc = glGetUniformLocation(shader, "projection")
@@ -156,13 +158,13 @@ while not glfw.window_should_close(window):
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
     rot_x = pyrr.Matrix44.from_x_rotation(0.5 * glfw.get_time())
-    rot_y = pyrr.Matrix44.from_y_rotation(0.5 * glfw.get_time())
+    rot_y = pyrr.Matrix44.from_y_rotation(0.8 * glfw.get_time())
 
     rotation = pyrr.matrix44.multiply(rot_x, rot_y)
+    model = pyrr.matrix44.multiply(scale, rotation)
+    model = pyrr.matrix44.multiply(model, translation)
 
-    model = pyrr.matrix44.multiply(rotation, translation)
-
-    glUniformMatrix4fv(model_loc, 1, GL_FALSE, translation)
+    glUniformMatrix4fv(model_loc, 1, GL_FALSE, model)
 
     glDrawElements(GL_TRIANGLES, len(indices), GL_UNSIGNED_INT, None)
 

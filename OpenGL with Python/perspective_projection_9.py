@@ -141,8 +141,8 @@ glEnable(GL_DEPTH_TEST)
 glEnable(GL_BLEND)
 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
-projection = pyrr.matrix44.create_perspective_projection_matrix(45, 1280/720,0.1, 100)
-translation = pyrr.matrix44.create_from_translation(pyrr.Vector3([5, 0, -10]))
+projection = pyrr.matrix44.create_perspective_projection_matrix(45, 1280/720,0.1 , 100)
+translation = pyrr.matrix44.create_from_translation(pyrr.Vector3([5, 0.5, -10]))
 
 model_loc = glGetUniformLocation(shader, "model")
 proj_loc = glGetUniformLocation(shader, "projection")
@@ -156,13 +156,13 @@ while not glfw.window_should_close(window):
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
     rot_x = pyrr.Matrix44.from_x_rotation(0.5 * glfw.get_time())
-    rot_y = pyrr.Matrix44.from_y_rotation(0.5 * glfw.get_time())
+    rot_y = pyrr.Matrix44.from_y_rotation(0.8 * glfw.get_time())
 
     rotation = pyrr.matrix44.multiply(rot_x, rot_y)
 
     model = pyrr.matrix44.multiply(rotation, translation)
 
-    glUniformMatrix4fv(model_loc, 1, GL_FALSE, translation)
+    glUniformMatrix4fv(model_loc, 1, GL_FALSE, model)
 
     glDrawElements(GL_TRIANGLES, len(indices), GL_UNSIGNED_INT, None)
 
